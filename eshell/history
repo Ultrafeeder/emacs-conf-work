@@ -14,3 +14,4 @@ cd ../.ssh/
 LSCSHostPolicy.dll 
 ls 
 ssh-keygen -t ed25519
+rm config.el 
