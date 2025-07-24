@@ -15,3 +15,6 @@ LSCSHostPolicy.dll
 ls 
 ssh-keygen -t ed25519
 rm config.el 
+git status
+git commit -am "got basic functionality working, breaking up into scripts"
+git push

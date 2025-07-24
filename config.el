@@ -1,52 +1,8 @@
 (setq use-package-always-ensure t)
-(defvar elpaca-installer-version 0.11)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1 :inherit ignore
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (<= emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                  ,@(when-let* ((depth (plist-get order :depth)))
-                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                  ,(plist-get order :repo) ,repo))))
-                  ((zerop (call-process "git" nil buffer t "checkout"
-                                        (or (plist-get order :ref) "--"))))
-                  (emacs (concat invocation-directory invocation-name))
-                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                  ((require 'elpaca))
-                  ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
+(add-to-list 'load-path "~\\.emacs.d\\scripts\\")
 
-;; Uncomment for systems which cannot create symlinks:
- (elpaca-no-symlink-mode)
-  ;; Install use-package support
-      (elpaca elpaca-use-package
-        ;; Enable use-package :ensure support for Elpaca.
-        (elpaca-use-package-mode)
-        ;; Expands to: (elpaca evil (use-package evil :demand t))
-    (setq elpaca-use-package-by-default t))
-  (elpaca-wait)
+(require 'elpaca-setup)
+(require 'buffer-move)
 
 (use-package evil
           :init
@@ -107,10 +63,40 @@
     "e s" '(eshell :wk "Eshell"))
 (ult/leader-keys
   "h" '(:ignore t :wk "Help")
+  "h a" '(counsel-apropos :wk "Apropos")
+  "h b" '(describe-bindings :wk "Describe bindings")
+  "h c" '(describe-char :wk "Describe character under cursor")
+  "h d" '(:ignore t :wk "Emacs documentation")
+  "h d a" '(about-emacs :wk "About Emacs")
+  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+  "h d m" '(info-emacs-manual :wk "The Emacs manual")
+  "h d n" '(view-emacs-news :wk "View Emacs news")
+  "h d o" '(describe-distribution :wk "How to obtain Emacs")
+  "h d p" '(view-emacs-problems :wk "View Emacs problems")
+  "h d t" '(view-emacs-todo :wk "View Emacs todo")
+  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+  "h e" '(view-echo-area-messages :wk "View echo area messages")
   "h f" '(describe-function :wk "Describe function")
+  "h F" '(describe-face :wk "Describe face")
+  "h g" '(describe-gnu-project :wk "Describe GNU Project")
+  "h i" '(info :wk "Info")
+  "h I" '(describe-input-method :wk "Describe input method")
+  "h k" '(describe-key :wk "Describe key")
+  "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
+  "h L" '(describe-language-environment :wk "Describe language environment")
+  "h m" '(describe-mode :wk "Describe mode")
+  "h r" '(:ignore t :wk "Reload")
+  "h r r" '((lambda () (interactive)
+              (load-file "~/.config/emacs/init.el")
+              (ignore (elpaca-process-queues)))
+            :wk "Reload emacs config")
+  "h t" '(load-theme :wk "Load theme")
   "h v" '(describe-variable :wk "Describe variable")
-  "h r r" '(reload-init-file :wk "Reloads emacs config"))
-(ult/leader-keys
+  "h w" '(where-is :wk "Prints keybinding for command if set")
+  "h x" '(describe-command :wk "Display full documentation for command"))
+
+    (ult/leader-keys
   "m" '(:ignore t :wk "Org")
   "m a" '(org-agenda :wk "Org agenda")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
@@ -161,74 +147,7 @@
   (use-package nerd-icons-dired
     :hook (dired-mode . nerd-icons-dired-mode ))
 
-(require 'windmove)
-
-;;;###autoload
-(defun buf-move-up ()
-  "Swap the current buffer and the buffer above the split.
-If there is no split, ie now window above the current one, an
-error is signaled."
-;;  "Switches between the current buffer, and the buffer above the
-;;  split, if possible."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'up))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No window above this one")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-down ()
-"Swap the current buffer and the buffer under the split.
-If there is no split, ie now window under the current one, an
-error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'down))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (or (null other-win) 
-            (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
-        (error "No window under this one")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-left ()
-"Swap the current buffer and the buffer on the left of the split.
-If there is no split, ie now window on the left of the current
-one, an error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'left))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No left split")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-right ()
-"Swap the current buffer and the buffer on the right of the split.
-If there is no split, ie now window on the right of the current
-one, an error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'right))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No right split")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
+(setq backup-directory-alist '((".*" . "~\\.backups")))
 
 (use-package company
     :defer 2
@@ -332,7 +251,13 @@ one, an error is signaled."
 (setq inhibit-startup-screen t)
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'Backender t)
+(use-package doom-themes
+:custom
+(doom-themes-enable-bold t )   ; if nil, bold is universally disabled
+    (doom-themes-enable-italic t)
+    :config
+(load-theme 'doom-sourcerer t)
+)  ;
 
 (use-package rainbow-mode
   :diminish
@@ -369,6 +294,14 @@ one, an error is signaled."
 			       'ivy-rich-switch-buffer-transformer))
 
 (use-package lua-mode)
+
+(use-package doom-modeline
+	      :init (doom-modeline-mode 1)
+	      :config
+	      (setq doom-modeline-height 20
+		    doom-modeline-bar-width 5
+		    doom-modeline-persp-name t
+		    doom-modeline-persp-icon t))
 
 (use-package neotree
   :config
