@@ -409,7 +409,7 @@
         neo-show-hidden-files t
         neo-window-width 55
         neo-window-fixed-size nil
-        inhibit-compacting-font-caches t
+        inhibit-compacting-font-caches R
         projectile-switch-project-action 'neotree-projectile-action) 
         ;; truncate long file names in neotree
         (add-hook 'neo-after-create-hook
@@ -448,6 +448,7 @@
 					  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 (global-auto-revert-mode t)
 (setq org-edit-src-content-indentation 0)
+(global-set-key [escape] 'keyboard-escape-quit)
 
 (require 'org-tempo)
 

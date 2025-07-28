@@ -83,7 +83,8 @@ Sourcing the scripts that contain package definitions/configurations as well as 
         :config
         (setq evil-collection-mode-list '(dashboard dired ibuffer))
         (evil-collection-init))
-      (use-package evil-tutor)
+      (use-package evil-tutor
+)
 
           ;;Turns off elpaca-use-package-mode current declaration
           ;;Note this will cause evaluate the declaration immediately. It is not deferred.
@@ -561,7 +562,7 @@ R
         neo-show-hidden-files t
         neo-window-width 55
         neo-window-fixed-size nil
-        inhibit-compacting-font-caches t
+        inhibit-compacting-font-caches R
         projectile-switch-project-action 'neotree-projectile-action) 
         ;; truncate long file names in neotree
         (add-hook 'neo-after-create-hook
@@ -604,14 +605,15 @@ R
 
 ** QOL Enhancements in Org mode
 #+begin_src emacs-lisp
-  (electric-indent-mode -1)
-  (electric-pair-mode 1)
-  (add-hook 'org-mode-hook (lambda ()
-  			   (setq-local electric-pair-inhibit-predicate
-  				       '(lambda (c)
-  					  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-  (global-auto-revert-mode t)
-  (setq org-edit-src-content-indentation 0)
+(electric-indent-mode -1)
+(electric-pair-mode 1)
+(add-hook 'org-mode-hook (lambda ()
+			   (setq-local electric-pair-inhibit-predicate
+				       '(lambda (c)
+					  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+(global-auto-revert-mode t)
+(setq org-edit-src-content-indentation 0)
+(global-set-key [escape] 'keyboard-escape-quit)
 #+end_src 
 
 ** Enable tempo shortcuts
