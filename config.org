@@ -84,6 +84,7 @@ Sourcing the scripts that contain package definitions/configurations as well as 
         (setq evil-collection-mode-list '(dashboard dired ibuffer))
         (evil-collection-init))
       (use-package evil-tutor
+
 )
 
           ;;Turns off elpaca-use-package-mode current declaration
@@ -562,7 +563,8 @@ R
         neo-show-hidden-files t
         neo-window-width 55
         neo-window-fixed-size nil
-        inhibit-compacting-font-caches R
+        inhibit-compacting-font-caches 
+t
         projectile-switch-project-action 'neotree-projectile-action) 
         ;; truncate long file names in neotree
         (add-hook 'neo-after-create-hook
