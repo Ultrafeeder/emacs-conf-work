@@ -23,6 +23,11 @@
         ;;Useful for configuring built-in emacs features.
         (use-package emacs :ensure nil :config (setq ring-bell-function #'ignore))
 ;; Don't install anything. Defer execution of BODY
+(with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "SPC") nil)
+  (define-key evil-motion-state-map (kbd "RET") nil)
+  (define-key evil-motion-state-map (kbd "TAB") nil))
+(setq org-return-follows-link t)
 
 (use-package general
       :config
@@ -34,10 +39,9 @@
       :global-prefix "M-SPC")
     (ult/leader-keys
       "." '(find-file :wk "Find file")
-      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-      "f r" '(counsel-recentf :wk "Find recent files" )
       "TAB TAB" '(comment-line :wk "Comment lines")
-	  "p s" '(powershell :wk "Powershell"))
+	  "p s" '(powershell :wk "Powershell")
+	  "o e" '(elfeed :wk "Open Elfeed"))
     (ult/leader-keys
       "b" '(:ignore t :wk "buffer")
       "b b" '(switch-to-buffer :wk "Switch buffer")
@@ -62,6 +66,47 @@
     "e r" '(eval-region :wk "Evaluate elisp in region")
     "e s" '(eshell :wk "Eshell"))
 (ult/leader-keys
+  "f" '(:ignore t :wk "Files")    
+  "f c" '((lambda () (interactive)
+            (find-file "~/.config/emacs/config.org")) 
+          :wk "Open emacs config.org")
+  "f e" '((lambda () (interactive)
+            (dired "~/.config/emacs/")) 
+          :wk "Open user-emacs-directory in dired")
+  "f d" '(find-grep-dired :wk "Search for string in files in DIR")
+  "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
+  "f i" '((lambda () (interactive)
+            (find-file "~/.config/emacs/init.el")) 
+          :wk "Open emacs init.el")
+  "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
+  "f l" '(counsel-locate :wk "Locate a file")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
+  (ult/leader-keys
+  "g" '(:ignore t :wk "Git")    
+  "g /" '(magit-dispatch :wk "Magit dispatch")
+  "g ." '(magit-file-dispatch :wk "Magit file dispatch")
+  "g b" '(magit-branch-checkout :wk "Switch branch")
+  "g c" '(:ignore t :wk "Create") 
+  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+  "g c c" '(magit-commit-create :wk "Create commit")
+  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+  "g C" '(magit-clone :wk "Clone repo")
+  "g f" '(:ignore t :wk "Find") 
+  "g f c" '(magit-show-commit :wk "Show commit")
+  "g f f" '(magit-find-file :wk "Magit find file")
+  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+  "g F" '(magit-fetch :wk "Git fetch")
+  "g g" '(magit-status :wk "Magit status")
+  "g i" '(magit-init :wk "Initialize git repo")
+  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+  "g r" '(vc-revert :wk "Git revert file")
+  "g s" '(magit-stage-file :wk "Git stage file")
+  "g t" '(git-timemachine :wk "Git time machine")
+  "g u" '(magit-stage-file :wk "Git unstage file"))
+(ult/leader-keys
+
   "h" '(:ignore t :wk "Help")
   "h a" '(counsel-apropos :wk "Apropos")
   "h b" '(describe-bindings :wk "Describe bindings")
@@ -112,7 +157,12 @@
 (ult/leader-keys
   "m d" '(:ignore t :wk "Date/deadline")
   "m d t" '(org-time-stamp :wk "Org time stamp"))
-
+(ult/leader-keys
+  "o" '(:ignore t :wk "Open")
+  "o d" '(dashboard-open :wk "Dashboard")
+  "o e" '(elfeed :wk "Elfeed RSS")
+  "o f" '(make-frame :wk "Open buffer in new frame")
+  "o F" '(select-frame-by-name :wk "Select frame by name"))
 (ult/leader-keys
   "p" '(projectile-command-map :wk "Projectile"))
 (ult/leader-keys
@@ -121,6 +171,12 @@
   "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
   "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
   "t t" '(visual-line-mode :wk "Toggle truncated lines"))
+  (ult/leader-keys
+  "s" '(:ignore t :wk "Search")
+  "s d" '(dictionary-search :wk "Search dictionary")
+  "s m" '(man :wk "Man pages")
+  "s t" '(tldr :wk "Lookup TLDR docs for a command")
+  "s w" '(woman :wk "Similar to man but doesn't require man"))
 (ult/leader-keys
   "w" '(:ignore t :wk "Windows")
   ;; Window splits
@@ -169,7 +225,7 @@
   (setq initial-buffer-choice 'dashboard-open)
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "Welcome to the Cockpit!")
+  (setq dashboard-banner-logo-title "Many bugs to catch!")
   (setq dashboard-startup-banner "~/.emacs.d/themes/pngegg.png")
   (setq dashboard-center-content nil)
   (setq dashboard-items '((recents . 5)
@@ -202,6 +258,35 @@
     (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 )
+
+(use-package elfeed
+  :config
+  (setq elfeed-search-feed-face ":foreground #ffffff :weight bold"
+        elfeed-feeds (quote
+                       (("https://www.reddit.com/r/linux.rss" reddit linux)
+                        ("https://www.reddit.com/r/commandline.rss" reddit commandline)
+                        ("https://www.reddit.com/r/distrotube.rss" reddit distrotube)
+                        ("https://www.reddit.com/r/emacs.rss" reddit emacs)
+                        ("https://www.gamingonlinux.com/article_rss.php" gaming linux)
+                        ("https://hackaday.com/blog/feed/" hackaday linux)
+                        ("https://opensource.com/feed" opensource linux)
+                        ("https://linux.softpedia.com/backend.xml" softpedia linux)
+                        ("https://itsfoss.com/feed/" itsfoss linux)
+                        ("https://www.zdnet.com/topic/linux/rss.xml" zdnet linux)
+                        ("https://www.phoronix.com/rss.php" phoronix linux)
+                        ("http://feeds.feedburner.com/d0od" omgubuntu linux)
+                        ("https://www.computerworld.com/index.rss" computerworld linux)
+                        ("https://www.networkworld.com/category/linux/index.rss" networkworld linux)
+                        ("https://www.techrepublic.com/rssfeeds/topic/open-source/" techrepublic linux)
+                        ("https://betanews.com/feed" betanews linux)
+                        ("http://lxer.com/module/newswire/headlines.rss" lxer linux)
+                        ("https://distrowatch.com/news/dwd.xml" distrowatch linux)))))
+
+(use-package elfeed-goodies
+  :init
+  (elfeed-goodies/setup)
+  :config
+  (setq elfeed-goodies/entry-pane-size 0.5))
 
 (use-package flycheck
   :defer t
@@ -262,6 +347,21 @@
 (use-package rainbow-mode
   :diminish
   :hook org-mode prog-mode)
+
+(use-package rainbow-delimiters
+  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
+	 (clojure-mode . rainbow-delimiters-mode)))
+
+(use-package git-timemachine
+    :after git-timemachine
+    :hook (evil-normalize-keymaps . git-timemachine-hook)
+    :config
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision)
+)
+
+(use-package transient)
+(use-package magit :after transient)
 
 (use-package counsel
 	:diminish
@@ -341,6 +441,13 @@
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (electric-indent-mode -1)
+(electric-pair-mode 1)
+(add-hook 'org-mode-hook (lambda ()
+			   (setq-local electric-pair-inhibit-predicate
+				       '(lambda (c)
+					  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+(global-auto-revert-mode t)
+(setq org-edit-src-content-indentation 0)
 
 (require 'org-tempo)
 

@@ -1,1 +1,1 @@
-("~/.emacs.d/")
+("~/.emacs.d/" "//bco-tax-t-ap1/NCPTSDEV/NCPTSApplication/NCPTS/" "c:/Users/stratjm/.emacs.d/")
