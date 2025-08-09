@@ -1,1 +1,1 @@
-("~/.emacs.d/" "//bco-tax-t-ap1/NCPTSDEV/NCPTSApplication/NCPTS/" "c:/Users/stratjm/.emacs.d/")
+("~/source/repos/TMS_Training1/" "~/.emacs.d/" "~/source/repos/bco_archive/" "~/source/repos/emacs-launcher/" "//bco-tax-t-ap1/NCPTSDEV/NCPTSApplication/NCPTS/" "c:/Users/stratjm/.emacs.d/")

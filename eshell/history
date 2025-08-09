@@ -18,3 +18,11 @@ rm config.el
 git status
 git commit -am "got basic functionality working, breaking up into scripts"
 git push
+mkdir cpp_tst
+git
+cat 
+cat "tst" >> tst.cpp
+cat launch.json
+ls
+cat "" >> launch.json
+ls 
